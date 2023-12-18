@@ -1,31 +1,26 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import dayjs from 'dayjs';
+// 导入VS Code扩展开发的API，模块 'vscode' 包含了VS Code的扩展功能
+// 在下面的代码中，导入该模块并给它起了别名 'vscode'
 import * as vscode from 'vscode';
+import Commands from './commands';
+import useIntervalTimer from './utils/timer';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const timer = useIntervalTimer();
+// 此方法在扩展被激活时被调用
+// 扩展在首次执行命令时被激活
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "memoryusage" is now active!');
+  // commandId 参数必须与 package.json 中的 command 字段匹配
+  // 将注册命令的 disposable 对象添加到 subscriptions 数组中
+  context.subscriptions.splice(context.subscriptions.length, 0, ...Commands);
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand('memoryusage.load', () => {
-    // The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    vscode.window.showInformationMessage('MemoryUsage插件已被成功加载!');
-  });
-  const showTime = vscode.commands.registerCommand('memoryusage.showTime', () => {
-    vscode.window.setStatusBarMessage(dayjs().format('YYYY/MM/DD HH:mm:ss'), 5000);
-    // vscode.window.showInformationMessage
-  });
-
-  context.subscriptions.push(disposable);
-  context.subscriptions.push(showTime);
+  // 在插件激活时先执行一次更新状态栏的命令
+  vscode.commands.executeCommand('memoryusage.loading');
+  timer.start(() => {
+    vscode.commands.executeCommand('memoryusage.updateMemory');
+  }, 1500);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+// 当扩展被停用时，将执行此方法
+export function deactivate() {
+  // 停用时清理定时器
+  timer.stop();
+}

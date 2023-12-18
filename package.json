@@ -14,12 +14,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "memoryusage.load",
-        "title": "Load"
+        "command": "memoryusage.loading",
+        "title": "Loading"
       },
       {
-        "command": "memoryusage.showTime",
-        "title": "Show Time"
+        "command": "memoryusage.updateMemory",
+        "title": "Update Memory"
       }
     ]
   },
